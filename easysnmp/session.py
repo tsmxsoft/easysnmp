@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import os
 import re
+import traceback
 
 # Don't attempt to import the C interface if building docs on RTD
 if not os.environ.get('READTHEDOCS', False):  # noqa
@@ -173,24 +174,14 @@ class Session(object):
         use_sprint_value=False, use_enums=False, best_guess=0,
         retry_no_such=False, abort_on_nonexistent=False
     ):
-        # Validate and extract the remote port
-        if len(hostname.split(':')) == 2:
-            if remote_port:
-                raise ValueError(
-                    'a remote port was specified yet the hostname appears '
-                    'to have a port defined too'
-                )
-            else:
-                hostname, remote_port = hostname.split(':')
-                remote_port = int(remote_port)
-
-        self.hostname = hostname
+    
+        self.hostname = self.parse_hostname(hostname)
         self.version = version
         self.community = community
         self.timeout = timeout
         self.retries = retries
         self.local_port = local_port
-        self.remote_port = remote_port
+        self.remote_port = int(remote_port)
         self.security_level = security_level
         self.security_username = security_username
         self.privacy_protocol = privacy_protocol
@@ -285,6 +276,17 @@ class Session(object):
                 self.retries,
                 timeout_microseconds
             )
+
+    def parse_hostname(self, hostname):
+        try:
+            v6pattern = r'(?:^|(?<=\s))(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))(?=\s|$)'
+
+            if re.search(v6pattern, hostname):
+                hostname = '[%s]' % hostname
+        except:
+            traceback.print_exc()
+
+        return hostname
 
     @property
     def connect_hostname(self):
