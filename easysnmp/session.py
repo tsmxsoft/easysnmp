@@ -164,7 +164,7 @@ class Session(object):
 
     def __init__(
         self, hostname='localhost', version=3, community='public',
-        timeout=1, retries=3, remote_port=0, local_port=0,
+        timeout=1, retries=3, remote_port=161, local_port=0,
         security_level='no_auth_or_privacy', security_username='initial',
         privacy_protocol='DEFAULT', privacy_password='',
         auth_protocol='DEFAULT', auth_password='', context_engine_id='',

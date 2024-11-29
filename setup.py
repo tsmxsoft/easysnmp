@@ -81,7 +81,7 @@ with open('README.rst') as f:
 
 setup(
     name='easysnmp',
-    version='0.2.6a',
+    version='0.2.7a',
     description='A blazingly fast and Pythonic SNMP library based on the '
                 'official Net-SNMP bindings',
     long_description=long_description,
